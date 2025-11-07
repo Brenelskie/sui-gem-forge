@@ -7,7 +7,7 @@
 export const NETWORK = 'testnet'; // 'testnet' | 'mainnet' | 'devnet' | 'localnet'
 
 // Replace with your deployed package ID
-export const PACKAGE_ID = process.env.VITE_PACKAGE_ID || '0x_YOUR_PACKAGE_ID_HERE';
+export const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || '0x_YOUR_PACKAGE_ID_HERE';
 
 // Module name (usually the contract file name)
 export const MODULE_NAME = 'nft_marketplace';
@@ -29,7 +29,7 @@ export const OBJECT_TYPES = {
 } as const;
 
 // Admin address (replace with actual admin address)
-export const ADMIN_ADDRESS = process.env.VITE_ADMIN_ADDRESS || '0x_ADMIN_ADDRESS_HERE';
+export const ADMIN_ADDRESS = import.meta.env.VITE_ADMIN_ADDRESS || '0x_ADMIN_ADDRESS_HERE';
 
 // Marketplace fee percentage (if applicable)
 export const MARKETPLACE_FEE_PERCENT = 2.5;
