@@ -1,73 +1,203 @@
-# Welcome to your Lovable project
+# Sui NFT Marketplace DApp
 
-## Project info
+A production-ready React front-end for a Sui NFT marketplace built with TypeScript, Sui DApp Kit, and modern Web3 technologies.
 
-**URL**: https://lovable.dev/projects/70abbb57-473f-4232-8694-d763e210b4bf
+## 🚀 Features
 
-## How can I edit this code?
+- **Wallet Integration**: Connect and manage Sui wallets with automatic balance updates
+- **NFT Minting**: Create unique NFTs with name, description, and image URL
+- **Marketplace**: Browse, search, and trade NFTs with other users
+- **List & Buy**: List your NFTs for sale or purchase from others
+- **Admin Panel**: Manage marketplace fees and withdraw accumulated revenue
+- **Responsive Design**: Beautiful UI optimized for all devices
 
-There are several ways of editing your application.
+## 🛠️ Tech Stack
 
-**Use Lovable**
+- **Frontend**: React 18 + TypeScript + Vite
+- **Blockchain**: Sui TypeScript SDK + Sui DApp Kit
+- **UI**: Tailwind CSS + shadcn/ui components
+- **State Management**: TanStack Query (React Query)
+- **Form Validation**: Zod
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/70abbb57-473f-4232-8694-d763e210b4bf) and start prompting.
+## 📋 Prerequisites
 
-Changes made via Lovable will be committed automatically to this repo.
+- Node.js 18+ and npm
+- A Sui wallet (e.g., Sui Wallet browser extension)
+- Deployed NFT marketplace Move contracts on Sui testnet/mainnet
 
-**Use your preferred IDE**
+## 🔧 Setup
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. **Clone and install dependencies**
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+npm install
+```
 
-Follow these steps:
+2. **Configure environment variables**
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Copy `.env.example` to `.env` and update with your values:
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```bash
+cp .env.example .env
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+Update these required values:
+- `VITE_PACKAGE_ID`: Your deployed NFT marketplace package ID
+- `VITE_ADMIN_ADDRESS`: Admin wallet address for fee withdrawal
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. **Update contract configuration**
+
+Edit `src/config/contracts.ts` to match your Move contract structure:
+- Module name
+- Function names (mint, list, buy, cancel, withdraw)
+- Object type definitions
+
+4. **Start development server**
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app will be available at `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📝 Contract Integration
 
-**Use GitHub Codespaces**
+### Required Move Contract Functions
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Your NFT marketplace contract should expose these functions:
 
-## What technologies are used for this project?
+```move
+// Mint a new NFT
+public fun mint_nft(
+    name: String,
+    description: String,
+    image_url: String,
+    ctx: &mut TxContext
+)
 
-This project is built with:
+// List NFT for sale
+public fun list_nft(
+    nft: NFT,
+    price: u64,
+    marketplace: &mut Marketplace,
+    ctx: &mut TxContext
+)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+// Buy a listed NFT
+public fun buy_nft(
+    listing_id: ID,
+    payment: Coin<SUI>,
+    marketplace: &mut Marketplace,
+    ctx: &mut TxContext
+)
 
-## How can I deploy this project?
+// Cancel listing
+public fun cancel_listing(
+    listing_id: ID,
+    marketplace: &mut Marketplace,
+    ctx: &mut TxContext
+)
 
-Simply open [Lovable](https://lovable.dev/projects/70abbb57-473f-4232-8694-d763e210b4bf) and click on Share -> Publish.
+// Withdraw marketplace fees (admin only)
+public fun withdraw_fees(
+    marketplace: &mut Marketplace,
+    ctx: &mut TxContext
+)
+```
 
-## Can I connect a custom domain to my Lovable project?
+### Object Types
 
-Yes, you can!
+Update `OBJECT_TYPES` in `src/config/contracts.ts` to match your contract:
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```typescript
+export const OBJECT_TYPES = {
+  NFT: `${PACKAGE_ID}::${MODULE_NAME}::NFT`,
+  LISTING: `${PACKAGE_ID}::${MODULE_NAME}::Listing`,
+  MARKETPLACE: `${PACKAGE_ID}::${MODULE_NAME}::Marketplace`,
+};
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 🎯 Usage Flow
+
+### 1. Connect Wallet
+Click "Connect Wallet" in the header and approve the connection in your Sui wallet.
+
+### 2. Mint NFT
+- Navigate to the "Mint" page
+- Fill in NFT details (name, description, image URL)
+- Submit the transaction and approve in your wallet
+- Your NFT will appear in "My NFTs"
+
+### 3. List for Sale
+- Go to "My NFTs"
+- Click "List for Sale" on any NFT
+- Enter the price in SUI
+- Confirm the transaction
+
+### 4. Buy NFT
+- Browse the "Marketplace"
+- Click "Buy Now" on any listed NFT
+- Confirm the purchase transaction
+- The NFT transfers to your wallet
+
+### 5. Admin Functions
+- Connect with the admin wallet address
+- Navigate to "Admin" panel
+- View marketplace statistics
+- Withdraw accumulated fees
+
+## 📁 Project Structure
+
+```
+src/
+├── components/        # Reusable UI components
+│   ├── Header.tsx
+│   ├── WalletButton.tsx
+│   ├── NFTCard.tsx
+│   └── MintForm.tsx
+├── pages/            # Route pages
+│   ├── MyNFTs.tsx
+│   ├── Mint.tsx
+│   ├── Marketplace.tsx
+│   └── Admin.tsx
+├── hooks/            # Custom React hooks
+│   └── useSuiBalance.ts
+├── config/           # Configuration files
+│   └── contracts.ts
+├── lib/              # Utilities
+│   ├── suiClient.ts
+│   └── utils.ts
+└── App.tsx           # Main app with providers
+```
+
+## 🔐 Security Notes
+
+- All form inputs are validated client-side using Zod schemas
+- Transaction signatures are handled by the connected wallet
+- Admin functions verify the caller's address
+- Never commit your `.env` file to version control
+
+## 🎨 Customization
+
+### Styling
+The design system is defined in:
+- `src/index.css` - CSS variables and custom styles
+- `tailwind.config.ts` - Tailwind theme configuration
+
+### Contract Configuration
+Update `src/config/contracts.ts` for your specific Move contract.
+
+## 📚 Additional Resources
+
+- [Sui TypeScript SDK Docs](https://sdk.mystenlabs.com/typescript)
+- [Sui DApp Kit Guide](https://sdk.mystenlabs.com/dapp-kit)
+- [Sui Move Documentation](https://docs.sui.io/build/move)
+- [Demo Source Code](https://github.com/rjaymf10/demo-nft)
+
+## 🤝 Contributing
+
+This project was created for the DICT Sui DApp activity. Feel free to extend and customize it for your needs!
+
+## 📄 License
+
+MIT License - feel free to use this project for learning and development.
