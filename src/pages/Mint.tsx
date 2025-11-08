@@ -17,29 +17,48 @@ export default function Mint() {
     return new Promise<void>((resolve, reject) => {
       const tx = new Transaction();
 
-      // TODO: Replace with actual contract call
-      // Example structure (adjust based on your contract):
-      tx.moveCall({
-        target: `${PACKAGE_ID}::${MODULE_NAME}::${FUNCTIONS.MINT_NFT}`,
-        arguments: [
-          tx.pure.string(name),
-          tx.pure.string(description),
-          tx.pure.string(imageUrl),
-        ],
-      });
+      try {
+        // Call the mint function - adjust arguments based on your actual contract
+        // Common signatures: mint(name, description, url) or mint_to_sender(name, description, url)
+        tx.moveCall({
+          target: `${PACKAGE_ID}::${MODULE_NAME}::${FUNCTIONS.MINT_NFT}`,
+          arguments: [
+            tx.pure.string(name),
+            tx.pure.string(description),
+            tx.pure.string(imageUrl),
+          ],
+        });
+      } catch (error) {
+        console.error('Transaction building error:', error);
+        reject(new Error(`Failed to build transaction: ${error}`));
+        return;
+      }
 
       signAndExecute(
         {
           transaction: tx,
         },
         {
-          onSuccess: () => {
-            console.log('NFT minted successfully');
+          onSuccess: (result) => {
+            console.log('NFT minted successfully:', result);
             resolve();
           },
           onError: (error) => {
-            console.error('Minting error:', error);
-            reject(error);
+            console.error('Full minting error:', error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            
+            // Provide helpful error messages
+            if (errorMessage.includes('VMVerificationOrDeserializationError')) {
+              reject(new Error(
+                'Contract verification failed. Please verify:\n' +
+                '1. MODULE_NAME matches your contract module\n' +
+                '2. Function name is correct (check your Move contract)\n' +
+                '3. Arguments match the function signature\n' +
+                `Current: ${PACKAGE_ID}::${MODULE_NAME}::${FUNCTIONS.MINT_NFT}`
+              ));
+            } else {
+              reject(error);
+            }
           },
         }
       );
@@ -75,10 +94,18 @@ export default function Mint() {
         <MintForm onMint={handleMint} />
 
         <Alert className="bg-muted/30 border-primary/20">
-          <AlertDescription className="text-sm">
-            <strong>Note:</strong> Make sure your contract is deployed and the PACKAGE_ID 
-            in <code className="text-primary">src/config/contracts.ts</code> is updated with 
-            your deployed package address.
+          <AlertDescription className="text-sm space-y-2">
+            <div>
+              <strong>Current Configuration:</strong>
+            </div>
+            <div className="font-mono text-xs bg-background/50 p-2 rounded">
+              Package: {PACKAGE_ID.slice(0, 20)}...
+              <br />
+              Function: {MODULE_NAME}::{FUNCTIONS.MINT_NFT}
+            </div>
+            <div className="text-muted-foreground">
+              If minting fails, verify the module name and function name match your deployed Move contract.
+            </div>
           </AlertDescription>
         </Alert>
       </div>
